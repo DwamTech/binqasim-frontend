@@ -1,5 +1,7 @@
-import Image from "next/image";
-import { FiCheck, FiPieChart } from "react-icons/fi";
+import { getSystemContent } from "@/services/publicWebsite";
+import PublicContent from "@/components/PublicContent";
+import GovernanceHero from "@/components/GovernanceHero";
+import { FiCheck } from "react-icons/fi";
 import styles from "./page.module.css";
 
 export const metadata = {
@@ -22,27 +24,16 @@ const spendingItems = [
   "الأعمال الخيرية الأخرى فللناظر الصلاحية في تقدير ما يراه مناسبا للصرف فيها وتكون هذه المصارف في داخل المملكة أو خارجها ويقدم منها ما كان أنفع للواقف وأعظم مصلحة للمسلمين مع مراعاة اختلاف الأوقات والحاجات فقد يكون بعض هذه المصارف في زمن أنفع منهفي زمن آخر ويقدر ذلك الناظر",
 ];
 
-export default function FundsPage() {
+export default async function FundsPage() {
+  const html = await getSystemContent("masaref_alre3");
+  const hero = <GovernanceHero kind="funds"
+    title={html ? <>المصارف <span>الشرعية</span></> : <>مصاريف وقف <span>عبدالله بن قاسم</span></>}
+    eyebrow="وقف عبدالله بن قاسم"
+    description="منهج متوازن يجمع بين صيانة أصل الوقف، وتنمية ريعه، وتعظيم أثره في أوجه البر والخير." />;
+  if (html) return <main className={styles.page}>{hero}<PublicContent title="المصارف الشرعية" html={html} hideTitle /></main>;
   return (
     <main className={styles.page}>
-      <section className={styles.hero}>
-        <Image
-          src="/1e1d774f-79d8-4a61-b562-df90a0b9d85c.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className={styles.heroImage}
-        />
-        <div className={styles.heroOverlay} />
-        <div className={styles.container}>
-          <div className={styles.heroContent}>
-            <span className={styles.eyebrow}><FiPieChart aria-hidden />وقف عبدالله بن قاسم</span>
-            <h1>مصاريف وقف عبدالله بن قاسم</h1>
-            <p>منهج متوازن يجمع بين صيانة أصل الوقف، وتنمية ريعه، وتعظيم أثره في أوجه البر والخير.</p>
-          </div>
-        </div>
-      </section>
+      {hero}
 
       <section className={styles.contentSection}>
         <div className={styles.container}>

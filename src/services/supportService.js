@@ -2,7 +2,7 @@
 // SUPPORT SERVICE - API Integration for Support Request Forms
 // ════════════════════════════════════════════════════════════════════════════
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const API_BASE_URL = "/api/public";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPE DEFINITIONS
@@ -99,6 +99,10 @@ const createFormData = (form, fieldMap) => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const INDIVIDUAL_FIELD_MAP = {
+    idImage: "identity_image_path",
+    educationImage: "academic_qualification_path",
+    cvFile: "cv_path",
+    recommendationsFile: "recommendation_path",
     name: "full_name",
     gender: "gender",
     nationality: "nationality",
@@ -170,32 +174,21 @@ export const SupportService = {
      * Check if support services are enabled
      * @returns {Promise<SupportSettings>}
      */
-    getSettings: async () => {
-        try {
+    getSettings: async (signal) => {
             const response = await fetch(`${API_BASE_URL}/support/settings`, {
                 method: "GET",
                 headers: {
                     "Accept": "application/json",
                 },
+                cache: "no-store",
+                signal,
             });
 
             if (!response.ok) {
-                // Return default values if endpoint fails
-                return {
-                    individual_support_enabled: true,
-                    institutional_support_enabled: true,
-                };
+                throw new Error("Support settings unavailable");
             }
 
             return response.json();
-        } catch (error) {
-            console.error("Failed to fetch support settings:", error);
-            // Return default values on error
-            return {
-                individual_support_enabled: true,
-                institutional_support_enabled: true,
-            };
-        }
     },
 
     /**

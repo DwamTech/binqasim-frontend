@@ -578,7 +578,10 @@
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
   animation: modalSlideIn 0.4s ease;
   position: relative;
-  overflow: hidden;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  outline: none;
 }
 
 .successModal::before {
@@ -830,3 +833,39 @@
     justify-content: center;
   }
 }
+
+.phoneControl { display: flex; align-items: stretch; border: 1px solid #d5dfdc; border-radius: 12px; background: #fff; overflow: hidden; }
+.phonePrefix { display: grid; place-items: center; padding: 0 14px; background: #eef4f2; border-right: 1px solid #d5dfdc; font-weight: 700; color: #385f58; }
+.phoneControl > input { min-width: 0; flex: 1; border: 0; border-radius: 0; direction: ltr; }
+.phoneControl:focus-within { outline: 2px solid #385f58; outline-offset: 2px; }
+
+/* Support request presentation. */
+.section { padding: 28px 24px 56px; background: #f7f8f2; }
+.container { max-width: 1100px; padding: 28px 32px; border: 1px solid #dfe5d7; border-radius: 20px; background: #fff; box-shadow: 0 16px 40px rgba(36, 66, 44, .05); animation: none; }
+.tabs { padding: 6px; gap: 6px; margin-bottom: 28px; border: 1px solid #e0e6d7; border-radius: 12px; background: #f1f4eb; }
+.tabBtn { display: flex; align-items: center; justify-content: center; gap: 10px; height: 50px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: #7b8971; font-size: 14px; cursor: pointer; }
+.tabBtnActive, .tabBtnActive:hover { background: #385f58; color: #fff; border-color: #385f58; box-shadow: 0 4px 12px rgba(36, 66, 44, .12); }
+.tabBtn:hover:not(.tabBtnActive) { background: #e7eddf; transform: none; }
+.tabIcon { display: inline-flex; align-items: center; font-size: 19px; }
+.form { gap: 18px; }
+.sectionHeader { margin: 20px 0 0; padding: 13px 16px; border-right: 3px solid #b79e70; border-radius: 8px; background: #f2f5ec; }
+.sectionTitle { color: #385f58; font-size: 15px; }
+.label { color: #5e7055; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+.input, .select, .textarea, .file { border-color: #dfe5d7; background-color: #fafbf7; border-radius: 9px; color: #203f37; font-size: 14px; min-height: 46px; }
+.input:focus, .select:focus, .textarea:focus { transform: none; background-color: #fff; border-color: #56705b; box-shadow: 0 0 0 3px rgba(86, 112, 91, .1); }
+.input::placeholder { color: #9ca791; font-size: 12px; }
+.hint { color: #8b967f; font-size: 10px; }
+.file { font-size: 12px; border-style: dashed; padding: 10px; }
+.file::file-selector-button { padding: 8px 12px; margin-inline-end: 10px; border: 1px solid #d6dfc9; border-radius: 6px; background: #edf3e5; color: #56705b; font-family: inherit; cursor: pointer; }
+.fileLabel { border-color: #b8c5ab; background: #f8faf4; border-radius: 9px; font-size: 12px; }
+.fileLabelSelected { background: #edf4e5; }
+.actions { border-top: 1px solid #e5eade; padding-top: 20px; margin-top: 12px; }
+.submit { min-width: 210px; height: 48px; border-radius: 10px; background: #385f58; border-color: #385f58; font-size: 13px; box-shadow: none; }
+.submit:hover:not(:disabled) { background: #244b40; transform: none; box-shadow: 0 6px 18px rgba(36, 66, 44, .12); }
+.addGoal { border-radius: 8px; border-color: #cbd8bd; background: #edf3e5; color: #56705b; }
+.toast { top: 124px; }
+.phoneControl { border-color: #dfe5d7; border-radius: 9px; background: #fafbf7; }
+.phonePrefix { background: #edf3e5; border-color: #dfe5d7; color: #56705b; }
+.tabBtn:focus-visible, .submit:focus-visible, .addGoal:focus-visible, .file:focus-visible, .fileLabel:focus-visible { outline: 3px solid #b79e70; outline-offset: 4px; }
+@media (max-width: 768px) { .section { padding: 24px 20px 36px; } .container { padding: 20px 18px; } .form { gap: 16px; } .tabs { margin-bottom: 20px; } .tabBtn { padding: 0 10px; font-size: 13px; } .tabIcon { display: inline-flex; font-size: 17px; } .submit { width: 100%; min-width: 0; } .toast { top: 105px; } }
+@media (prefers-reduced-motion: reduce) { .tabBtn, .input, .select, .textarea, .submit, .file, .fileLabel, .addGoal, .conditionalField { transition: none; animation: none; } .toast { animation: none; } }

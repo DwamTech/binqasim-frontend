@@ -89,7 +89,8 @@
   border: 1px solid #eee;
   background: #fff;
   border-radius: 14px;
-  padding: 14px 42px 14px 14px;
+  padding: 22px 16px 10px 48px;
+  min-height: 60px;
   font-size: 16px;
   font-family: inherit;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease, background 0.15s ease;
@@ -126,6 +127,7 @@
 .input:not(:placeholder-shown)+.flabel,
 .textarea:not(:placeholder-shown)+.flabel {
   top: 8px;
+  transform: none;
   font-size: 12px;
   color: var(--brand-primary);
 }
@@ -377,3 +379,37 @@
     }
   }
 }
+
+/* Opt-in presentation for the suggestions page. */
+.enhanced { padding: clamp(36px, 5vw, 60px) 24px; background: radial-gradient(ellipse at 0% 100%, rgba(204, 185, 143, .15), transparent 50%), #f7f8f2; }
+.enhanced .container { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); gap: 0; max-width: 1100px; padding: 0; overflow: hidden; align-items: stretch; text-align: start; background: #fff; border: 1px solid #dfe5d7; border-radius: 20px; box-shadow: 0 16px 40px rgba(36, 66, 44, .06); backdrop-filter: none; animation: none; }
+.enhanced .formIntro { position: relative; padding: 36px 30px; background: linear-gradient(145deg, #eaf0e3, #f1f3e9); border-inline-end: 1px solid #dfe5d7; }
+.enhanced .formIntro::before { content: ''; display: block; width: 32px; height: 3px; border-radius: 3px; background: #b79e70; margin-bottom: 24px; }
+.enhanced .title { text-align: start; font-size: clamp(22px, 2.5vw, 30px); line-height: 1.7; margin-bottom: 16px; }
+.enhanced .desc { color: #687960; font-size: 15px; line-height: 2.1; font-weight: 500; margin: 0; }
+.enhanced .form { max-width: none; margin: 0; padding: 32px; gap: 18px; align-content: start; }
+.enhanced .field:has(input[type='tel']) { grid-column: 1 / -1; }
+.enhanced .input, .enhanced .textarea { min-height: 58px; border-color: #dfe5d7; background: #fafbf7; border-radius: 10px; color: #203f37; font-size: 14px; }
+.enhanced .input:focus, .enhanced .textarea:focus { background: #fff; border-color: #56705b; box-shadow: 0 0 0 3px rgba(86, 112, 91, .1); transform: none; }
+.enhanced .textarea { min-height: 165px; padding-top: 28px; }
+.enhanced .textarea + .flabel { top: 24px; }
+.enhanced .textarea:focus + .flabel, .enhanced .textarea:not(:placeholder-shown) + .flabel { top: 8px; }
+.enhanced .flabel { color: #77856e; font-size: 12px; font-weight: 600; }
+.enhanced .icon { color: #9b8964; font-size: 15px; }
+.enhanced .control:has(textarea) .icon { top: 24px; }
+.enhanced .attachBtn { padding: 18px 16px; border: 1px dashed #b8c5ab; border-radius: 10px; background: #f8faf4; color: #738467; font-size: 12px; overflow-wrap: anywhere; }
+.enhanced .attachBtnActive { border-style: solid; background: #eef4e7; }
+.enhanced .attachCheck { color: #385f58; }
+.enhanced .hint { color: #8b967f; font-size: 10px; margin-top: 8px; }
+.enhanced .actions { justify-content: stretch; border-top: 1px solid #e5eade; padding-top: 18px; margin-top: 0; }
+.enhanced .submit { width: 100%; height: 48px; border-radius: 10px; background: #385f58; border-color: #385f58; font-size: 13px; cursor: pointer; }
+.enhanced .submit:hover:not(:disabled) { background: #244b40; transform: none; box-shadow: 0 6px 18px rgba(36, 66, 44, .12); }
+.enhanced .submit:disabled { cursor: not-allowed; }
+.enhanced .toast { top: 124px; font-size: 13px; max-width: calc(100% - 32px); }
+.enhanced .toastsuccess { background: #eef5e8; border: 1px solid #bdcfae; color: #244b40; }
+.enhanced .toasterror { background: #fff0ec; border: 1px solid #eac5b9; color: #934734; }
+.enhanced .toastClose { background: rgba(0, 0, 0, .04); color: inherit; }
+.enhanced .fileInput { display: block; position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.enhanced .attachLabel:focus-within .attachBtn, .enhanced .submit:focus-visible { outline: 3px solid #b79e70; outline-offset: 4px; }
+@media (max-width: 760px) { .enhanced { padding: 32px 20px; } .enhanced .container { grid-template-columns: minmax(0, 1fr); } .enhanced .formIntro { padding: 24px; border-inline-end: 0; border-bottom: 1px solid #dfe5d7; } .enhanced .formIntro::before { margin-bottom: 16px; } .enhanced .title { margin-bottom: 10px; } .enhanced .form { padding: 24px; } .enhanced .toast { top: 105px; } }
+@media (prefers-reduced-motion: reduce) { .enhanced .input, .enhanced .textarea, .enhanced .flabel, .enhanced .submit, .enhanced .attachBtn { transition: none; } .enhanced .toast, .enhanced .spinner { animation: none; } }

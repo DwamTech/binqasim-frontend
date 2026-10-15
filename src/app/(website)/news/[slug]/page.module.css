@@ -173,6 +173,20 @@
   box-shadow: 0 22px 65px rgba(20, 54, 47, 0.09);
 }
 
+.content > div:first-child {
+  text-align: justify;
+  text-align-last: start;
+}
+
+.content > div:first-child p {
+  text-align: justify !important;
+  text-align-last: start;
+}
+
+.content > div:first-child :is(h1, h2, h3, h4, h5, h6, ul, ol) {
+  text-align: start;
+}
+
 .paragraph {
   margin: 0;
   color: #3e514c;
@@ -235,6 +249,10 @@
   color: var(--brand-primary);
   font-weight: 800;
   box-shadow: 0 9px 25px rgba(20, 54, 47, 0.07);
+}
+
+@media (max-width: 760px) {
+  .heroMeta { justify-content: center; }
 }
 
 @media (max-width: 600px) {

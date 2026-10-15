@@ -5,7 +5,7 @@ import styles from "./SupportCheckForm.module.css";
 import {
   FiSearch, FiUser, FiPhone, FiCheckCircle, FiXCircle,
   FiClock, FiAlertCircle, FiFileText, FiRefreshCw,
-  FiUpload, FiCalendar, FiMessageCircle
+  FiUpload, FiCalendar, FiMessageCircle, FiHash
 } from "react-icons/fi";
 
 // API Base URL
@@ -278,6 +278,7 @@ export default function SupportCheckForm() {
           </p>
         </div>
 
+        <div className={styles.workspace}>
         {/* Result Card */}
         {result && (
           <div className={`${styles.resultCard} ${styles[`result${getStatusConfig(result.status).color}`]}`}>
@@ -427,7 +428,7 @@ export default function SupportCheckForm() {
 
         {/* Error Message */}
         {errorMessage && (
-          <div className={styles.errorCard}>
+          <div className={styles.errorCard} role="alert">
             <FiAlertCircle size={24} />
             <p>{errorMessage}</p>
           </div>
@@ -435,13 +436,14 @@ export default function SupportCheckForm() {
 
         {/* Form - Hide when showing result */}
         {!result && (
-          <form className={styles.form} onSubmit={onSubmit} noValidate>
+          <form className={styles.form} onSubmit={onSubmit} noValidate aria-busy={isSubmitting}>
             {/* Request Type Tabs */}
             <div className={styles.tabs}>
               <button
                 type="button"
                 className={`${styles.tab} ${requestType === "individual" ? styles.tabActive : ""}`}
                 onClick={() => setRequestType("individual")}
+                aria-pressed={requestType === "individual"}
               >
                 <FiUser size={18} />
                 طلب أفراد
@@ -450,6 +452,7 @@ export default function SupportCheckForm() {
                 type="button"
                 className={`${styles.tab} ${requestType === "institutional" ? styles.tabActive : ""}`}
                 onClick={() => setRequestType("institutional")}
+                aria-pressed={requestType === "institutional"}
               >
                 <FiFileText size={18} />
                 طلب مؤسسات
@@ -480,7 +483,7 @@ export default function SupportCheckForm() {
                     placeholder="مثال: 0045"
                     aria-invalid={!!errors.requestNumber}
                   />
-                  <span className={styles.inputIcon}>🔢</span>
+                  <span className={styles.inputIcon} aria-hidden="true"><FiHash /></span>
                 </div>
                 {errors.requestNumber && (
                   <span className={styles.error}>{errors.requestNumber}</span>
@@ -510,7 +513,7 @@ export default function SupportCheckForm() {
                     dir="ltr"
                     aria-invalid={!!errors.phoneNumber}
                   />
-                  <span className={styles.inputIcon}>📱</span>
+                  <span className={styles.inputIcon} aria-hidden="true"><FiPhone /></span>
                 </div>
                 {errors.phoneNumber && (
                   <span className={styles.error}>{errors.phoneNumber}</span>
@@ -546,10 +549,11 @@ export default function SupportCheckForm() {
 
         {/* Info Note */}
         <div className={styles.infoNote}>
-          <span className={styles.noteIcon}>💡</span>
+          <span className={styles.noteIcon} aria-hidden="true"><FiAlertCircle /></span>
           <span>
             رقم الطلب هو الرقم الذي حصلت عليه عند تقديم طلبك. إذا فقدته، يرجى التواصل معنا.
           </span>
+        </div>
         </div>
       </div>
     </section>

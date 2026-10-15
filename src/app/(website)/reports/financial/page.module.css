@@ -485,3 +485,5 @@
     transition: none;
   }
 }
+
+@media (max-width: 760px) { .heroFeatures { justify-content: center; } }

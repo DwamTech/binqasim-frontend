@@ -16,7 +16,7 @@ const sections = [
 export default function PrivacyPolicyPage() {
   return (
     <main className={styles.page}>
-      <section className={styles.hero}>
+      <section className={styles.hero} data-site-hero>
         <div className={styles.container}>
           <span>الروابط القانونية</span>
           <h1>سياسة الخصوصية</h1>

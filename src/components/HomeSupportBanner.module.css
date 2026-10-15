@@ -1,0 +1,16 @@
+.section { position: relative; isolation: isolate; overflow: hidden; width: 100%; color: #fff; background-color: #173a31; padding: clamp(40px, 5vw, 64px) 24px; }
+.section::before { content: ''; position: absolute; z-index: -2; inset: 0 auto 0 0; width: 62%; background: url('/support-banner-background.webp') left 55% / cover no-repeat; pointer-events: none; }
+.section::after { content: ''; position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, rgba(11, 33, 25, .18) 0%, rgba(15, 43, 32, .38) 25%, rgba(17, 48, 36, .9) 52%, #173a31 72%), linear-gradient(0deg, rgba(9, 28, 21, .18), transparent 60%); pointer-events: none; }
+.banner { position: relative; max-width: 1200px; margin: auto; }
+.copy { max-width: 540px; }
+.status { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid rgba(223, 201, 163, .27); border-radius: 999px; color: #e2d2b1; background: rgba(13, 42, 32, .25); font-size: 11px; }
+.status svg { font-size: 14px; }
+.copy h2 { margin-top: 20px; font-size: clamp(22px, 2.6vw, 36px); line-height: 1.45; letter-spacing: -.5px; font-weight: 600; white-space: nowrap; }
+.copy h2 span { color: #dfc9a3; font-weight: 800; }
+.copy > p { max-width: 420px; color: #d2dfd2; font-size: 15px; line-height: 2; margin-top: 16px; text-wrap: pretty; }
+.action { display: inline-flex; align-items: center; justify-content: center; gap: 30px; margin-top: 26px; padding: 14px 22px; border: 1px solid #dfc9a3; border-radius: 9px; color: #203f37; background: #dfc9a3; font-size: 13px; font-weight: 800; transition: background .2s, box-shadow .2s; }
+.action svg { font-size: 20px; }
+.action:hover { background: #eee0c5; box-shadow: 0 8px 22px rgba(0, 0, 0, .1); }
+.action:focus-visible { outline: 3px solid #dfc9a3; outline-offset: 5px; }
+@media (max-width: 760px) { .section { padding: 36px 20px; } .section::before { width: 100%; background-position: left 55%; } .section::after { background: linear-gradient(90deg, rgba(13, 39, 29, .79), rgba(17, 48, 36, .96)); } .copy { max-width: 520px; } .copy h2 { font-size: clamp(16px, 4.5vw, 30px); } .copy > p { font-size: 13px; } .status { font-size: 10px; } }
+@media (prefers-reduced-motion: reduce) { .action { transition: none; } }

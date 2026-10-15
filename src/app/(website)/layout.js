@@ -1,9 +1,11 @@
 import "./globals.css";
-import { Tajawal } from "next/font/google";
+import { getSiteContact } from "@/services/publicWebsite";
+import { Cairo } from "next/font/google";
 import styles from "./layout.module.css";
 import Image from "next/image";
 import Link from "next/link";
 import HeaderNav from "../../components/HeaderNav";
+import SiteHeader from "../../components/SiteHeader";
 import ScrollToTopButton from "../../components/ScrollToTopButton";
 import {
   FaYoutube,
@@ -15,19 +17,29 @@ import {
 } from "react-icons/fa";
 
 export const metadata = {
+  icons: { icon: "/ben-icon.png", apple: "/ben-icon.png" },
   title: "وقف عبد الله بن قاسم",
   description: "موقع وقف عبد الله بن قاسم",
 };
 
-const tajawal = Tajawal({
-  weight: ["400", "500", "700", "800", "900"],
-  subsets: ["arabic"],
+const cairo = Cairo({
+  weight: ["400", "500", "600", "700", "800", "900"],
+  subsets: ["arabic", "latin"],
+  variable: "--font-cairo",
   display: "swap",
 });
 
 export const revalidate = 0;
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const contact = await getSiteContact();
+  const phone = contact.phones.support_phone || contact.phones.management_phone || "";
+  const email = contact.business_details.email || "";
+  const address = contact.business_details.address || "";
+  const socialLink = (key) => {
+    const value = contact.social[key];
+    try { const url = new URL(value); return ["http:", "https:"].includes(url.protocol) ? url.href : null; } catch { return null; }
+  };
   const now = new Date();
   const dateStr = new Intl.DateTimeFormat("ar-SA", {
     weekday: "long",
@@ -37,28 +49,29 @@ export default function RootLayout({ children }) {
   }).format(now);
   return (
     <html lang="ar" dir="rtl">
-      <body className={tajawal.className}>
-        <header>
+      <body className={`${cairo.className} ${cairo.variable}`}>
+        <SiteHeader>
           <div className={styles.topbar}>
             <div className={styles.topbarInner}>
               <div className={styles.rightGroup}>
-                <a href="tel:0138337589" className={styles.contactLink} dir="ltr">
+                <span className={styles.topbarTagline}>عطاء مستدام · أثر متجدد</span>
+                <a href={`tel:${phone}`} className={styles.contactLink} dir="ltr">
                   <FaPhone size={13} aria-hidden />
-                  <span>0138337589</span>
+                  <span>{phone}</span>
                 </a>
                 <span className={styles.divider} />
-                <a href="mailto:info@wqfalthani.com" className={styles.contactLink} dir="ltr">
+                <a href={`mailto:${email}`} className={styles.contactLink} dir="ltr">
                   <FaEnvelope size={13} aria-hidden />
-                  <span>info@wqfalthani.com</span>
+                  <span>{email}</span>
                 </a>
               </div>
               <div className={styles.leftGroup}>
                 <span className={styles.date}>{dateStr}</span>
                 <span className={styles.divider} />
                 <div className={styles.social}>
-                  <a href="#" aria-label="YouTube"><FaYoutube size={18} /></a>
-                  <a href="#" aria-label="Twitter"><FaTwitter size={18} /></a>
-                  <a href="#" aria-label="Facebook"><FaFacebookF size={18} /></a>
+                  {socialLink("youtube") && <a href={socialLink("youtube")} aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube size={18} /></a>}
+                  {socialLink("twitter") && <a href={socialLink("twitter")} aria-label="Twitter" target="_blank" rel="noopener noreferrer"><FaTwitter size={18} /></a>}
+                  {socialLink("facebook") && <a href={socialLink("facebook")} aria-label="Facebook" target="_blank" rel="noopener noreferrer"><FaFacebookF size={18} /></a>}
                 </div>
               </div>
             </div>
@@ -77,10 +90,10 @@ export default function RootLayout({ children }) {
                   />
                 </Link>
               </div>
-              <HeaderNav />
+              <HeaderNav email={email} />
             </div>
           </div>
-        </header>
+        </SiteHeader>
         {children}
         <footer className={styles.footer}>
           <div className={styles.footerInner}>
@@ -108,16 +121,16 @@ export default function RootLayout({ children }) {
               <h4>روابط سريعة</h4>
               <ul>
                 <li><Link href="/about">من نحن</Link></li>
-                <li><a href="mailto:info@wqfalthani.com">تواصل معنا</a></li>
+                <li><a href={`mailto:${email}`}>تواصل معنا</a></li>
                 <li><Link href="/complaints">صندوق الشكاوى</Link></li>
               </ul>
             </nav>
-            <div className={`${styles.footerCol} ${styles.footerContact}`}>
+            <div id="site-contact" className={`${styles.footerCol} ${styles.footerContact}`}>
               <h4>تواصل معنا</h4>
               <address>
-                <p><FaMapMarkerAlt aria-hidden /><span><strong>العنوان:</strong> الدمام - حي الريان</span></p>
-                <p><FaPhone aria-hidden /><a href="tel:0138337589"><strong>رقم هاتف:</strong> <span dir="ltr">0138337589</span></a></p>
-                <p><FaEnvelope aria-hidden /><a href="mailto:info@wqfalthani.com"><strong>البريد:</strong> <span dir="ltr">info@wqfalthani.com</span></a></p>
+                <p><FaMapMarkerAlt aria-hidden /><span><strong>العنوان:</strong> {address}</span></p>
+                <p><FaPhone aria-hidden /><a href={`tel:${phone}`}><strong>رقم هاتف:</strong> <span dir="ltr">{phone}</span></a></p>
+                <p><FaEnvelope aria-hidden /><a href={`mailto:${email}`}><strong>البريد:</strong> <span dir="ltr">{email}</span></a></p>
               </address>
             </div>
           </div>

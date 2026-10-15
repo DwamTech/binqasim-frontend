@@ -12,7 +12,7 @@ import { PublicFeedbackService } from "@/services/publicFeedbackService";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^(?:\+?966|0)?5[0-9]{8}$/;
 
-const validateForm = (form, includePhone = false) => {
+const validateForm = (form, includePhone = false, requirePhone = false) => {
   const errors = {};
 
   // Name validation
@@ -30,6 +30,8 @@ const validateForm = (form, includePhone = false) => {
     errors.message = "الرسالة مطلوبة وبحد أدنى 10 أحرف";
   }
 
+  if (requirePhone && !form.phone.trim()) errors.phone = "??? ?????? ????? ??????";
+
   // Phone validation (optional but if provided must be valid)
   if (includePhone && form.phone && !PHONE_REGEX.test(form.phone.replace(/[\s-]/g, ""))) {
     errors.phone = "رقم الجوال غير صالح";
@@ -37,11 +39,11 @@ const validateForm = (form, includePhone = false) => {
 
   // Attachment validation
   if (form.attachment) {
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 1024 * 1024 * 1024; // 1GB
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/jpg"];
 
     if (form.attachment.size > maxSize) {
-      errors.attachment = "حجم الملف يجب ألا يتجاوز 5 ميجابايت";
+      errors.attachment = "حجم الملف يجب ألا يتجاوز 1 جيجابايت";
     }
     if (!allowedTypes.includes(form.attachment.type)) {
       errors.attachment = "نوع الملف غير مدعوم (PDF, JPG, PNG فقط)";
@@ -76,6 +78,7 @@ export default function FeedbackForm({
   type = "suggestion", // "suggestion" or "complaint"
   showPhone = true,
   showAttachment = true,
+  appearance = "default",
 }) {
   const [form, setForm] = useState({
     name: "",
@@ -106,11 +109,11 @@ export default function FeedbackForm({
     setTouched((t) => ({ ...t, [field]: true }));
 
     // Validate single field
-    const validation = validateForm(form, showPhone);
+    const validation = validateForm(form, showPhone, type === "complaint");
     if (validation[field]) {
       setErrors((err) => ({ ...err, [field]: validation[field] }));
     }
-  }, [form, showPhone]);
+  }, [form, showPhone, type]);
 
   // Handle file change
   const onFileChange = useCallback((e) => {
@@ -121,11 +124,11 @@ export default function FeedbackForm({
 
     // Validate file
     if (file) {
-      const maxSize = 5 * 1024 * 1024;
+      const maxSize = 1024 * 1024 * 1024;
       const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/jpg"];
 
       if (file.size > maxSize) {
-        setErrors((err) => ({ ...err, attachment: "حجم الملف يجب ألا يتجاوز 5 ميجابايت" }));
+        setErrors((err) => ({ ...err, attachment: "حجم الملف يجب ألا يتجاوز 1 جيجابايت" }));
       } else if (!allowedTypes.includes(file.type)) {
         setErrors((err) => ({ ...err, attachment: "نوع الملف غير مدعوم" }));
       } else {
@@ -142,7 +145,7 @@ export default function FeedbackForm({
     setTouched({ name: true, email: true, message: true, phone: true, attachment: true });
 
     // Validate
-    const validationErrors = validateForm(form, showPhone);
+    const validationErrors = validateForm(form, showPhone, type === "complaint");
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
@@ -183,7 +186,7 @@ export default function FeedbackForm({
         const apiErrors = {};
         for (const [key, messages] of Object.entries(error.validationErrors)) {
           // Map API field names to form field names
-          const fieldMap = { phone_number: "phone" };
+          const fieldMap = { phone_number: "phone", attachment: "attachment" };
           const formKey = fieldMap[key] || key;
           apiErrors[formKey] = Array.isArray(messages) ? messages[0] : messages;
         }
@@ -205,12 +208,14 @@ export default function FeedbackForm({
   };
 
   return (
-    <section className={styles.section} dir="rtl">
+    <section className={`${styles.section} ${appearance === "modern" ? styles.enhanced : ""}`} dir="rtl">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <div className={styles.container}>
+        <div className={styles.formIntro}>
         <h2 className={styles.title}>{title}</h2>
         <p className={styles.desc}>{description}</p>
+        </div>
 
         <form className={styles.form} onSubmit={onSubmit} noValidate>
           {/* Name Field */}
@@ -273,7 +278,7 @@ export default function FeedbackForm({
                   autoComplete="tel"
                   dir="ltr"
                 />
-                <span className={styles.flabel}>رقم الجوال (اختياري)</span>
+                <span className={styles.flabel}>{type === "complaint" ? "رقم الجوال *" : "رقم الجوال (اختياري)"}</span>
                 <FaPhone className={styles.icon} aria-hidden />
               </div>
               {touched.phone && errors.phone && <span className={styles.error}>{errors.phone}</span>}
@@ -318,7 +323,7 @@ export default function FeedbackForm({
                   {attachmentName && <span className={styles.attachCheck}>✓</span>}
                 </span>
               </label>
-              <span className={styles.hint}>PDF, JPG, PNG - الحد الأقصى 5MB</span>
+              <span className={styles.hint}>PDF, JPG, PNG - الحد الأقصى 1GB</span>
               {touched.attachment && errors.attachment && (
                 <span className={styles.error}>{errors.attachment}</span>
               )}

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import GovernanceHero from "./GovernanceHero";
 import {
   FiBookOpen,
   FiBriefcase,
@@ -90,27 +91,11 @@ const beneficiaries = [
 export default function AboutWaqfProfile() {
   return (
     <div className={styles.page}>
-      <section className={styles.hero}>
-        <Image
-          src="/about/4484.png"
-          alt="أحد أصول أوقاف عبدالله بن قاسم آل ثاني"
-          fill
-          priority
-          sizes="100vw"
-          className={styles.heroImage}
-        />
-        <div className={styles.heroOverlay} />
-        <div className={styles.heroPattern} aria-hidden />
-        <div className={styles.heroContent}>
-          <span className={styles.eyebrow}>عن الوقف</span>
-          <h1>تعريف بأوقاف عبدالله بن قاسم آل ثاني</h1>
-          <p>بمدينة صفوى بمحافظة القطيف</p>
-          <a href="#waqf-profile" className={styles.exploreLink}>
-            استكشف الوقف
-            <span aria-hidden>↓</span>
-          </a>
-        </div>
-      </section>
+      <GovernanceHero kind="about" eyebrow="عن الوقف"
+        title={<>تعريف بأوقاف <span>عبدالله بن قاسم آل ثاني</span></>}
+        description="بمدينة صفوى بمحافظة القطيف">
+        <a href="#waqf-profile" className={styles.exploreLink}>استكشف الوقف<span aria-hidden>↓</span></a>
+      </GovernanceHero>
 
       <main id="waqf-profile">
         <section className={styles.identitySection}>

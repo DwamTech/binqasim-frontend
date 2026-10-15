@@ -16,7 +16,7 @@ const sections = [
 export default function TermsAndConditionsPage() {
   return (
     <main className={styles.page}>
-      <section className={styles.hero}>
+      <section className={styles.hero} data-site-hero>
         <div className={styles.container}>
           <span>الروابط القانونية</span>
           <h1>الشروط والأحكام</h1>

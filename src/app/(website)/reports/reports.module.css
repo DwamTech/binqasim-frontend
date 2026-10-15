@@ -30,7 +30,7 @@
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.262);
-  font-family: "Cairo", sans-serif; 
+  font-family: inherit; 
   width: 260px;
 }
 

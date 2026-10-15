@@ -27,7 +27,7 @@ export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * Saudi IBAN Pattern
  * Format: SA followed by 22 alphanumeric characters
  */
-export const SA_IBAN_REGEX = /^SA[0-9]{2}[A-Z0-9]{18}$/i;
+export const SA_IBAN_REGEX = /^SA[0-9]{2}[A-Z0-9]{20}$/i;
 
 /**
  * Arabic Text Pattern (allows spaces, numbers)
@@ -209,9 +209,15 @@ export const validateIntlPhone = (value) => {
  */
 export const validateSAIBAN = (value) => {
     if (!value) return result(true);
-    const cleaned = value.replace(/\s/g, "").toUpperCase();
+    const cleaned = value.replace(/[\s-]/g, "").toUpperCase();
+    if (!cleaned.startsWith("SA")) {
+        return result(false, "رقم الآيبان يجب أن يبدأ بـ SA");
+    }
+    if (cleaned.length !== 24) {
+        return result(false, "رقم الآيبان يجب أن يتكوّن من 24 خانة: SA ثم 22 خانة");
+    }
     if (!SA_IBAN_REGEX.test(cleaned)) {
-        return result(false, "رقم الآيبان غير صالح (يجب أن يبدأ بـ SA)");
+        return result(false, "صيغة الآيبان غير صالحة: يجب أن يلي SA رقمان، ثم 20 رقمًا أو حرفًا إنجليزيًا");
     }
     return result(true);
 };
@@ -400,7 +406,7 @@ export const organizationFormSchema = {
     licenseNo: (value) => validateRequired(value, "رقم الترخيص"),
     licenseCert: (value) => validateFile(value, {
         required: true,
-        maxSizeMB: 5,
+        maxSizeMB: value?.type === "application/pdf" || value?.name?.toLowerCase().endsWith(".pdf") ? 1024 : 5,
         allowedTypes: ["application/pdf", "image/*"]
     }),
     email: (value) => {
@@ -410,7 +416,7 @@ export const organizationFormSchema = {
     },
     supportLetter: (value) => validateFile(value, {
         required: true,
-        maxSizeMB: 5,
+        maxSizeMB: value?.type === "application/pdf" || value?.name?.toLowerCase().endsWith(".pdf") ? 1024 : 5,
         allowedTypes: ["application/pdf"]
     }),
     phone: (value) => {
@@ -454,7 +460,7 @@ export const organizationFormSchema = {
     },
     projectFile: (value) => validateFile(value, {
         required: true,
-        maxSizeMB: 10,
+        maxSizeMB: value?.type === "application/pdf" || value?.name?.toLowerCase().endsWith(".pdf") ? 1024 : 10,
         allowedTypes: ["application/pdf"]
     }),
     projectManager: (value) => {
@@ -486,7 +492,7 @@ export const organizationFormSchema = {
     },
     opPlanFile: (value) => validateFile(value, {
         required: true,
-        maxSizeMB: 10,
+        maxSizeMB: value?.type === "application/pdf" || value?.name?.toLowerCase().endsWith(".pdf") ? 1024 : 10,
         allowedTypes: ["application/pdf"]
     }),
     supportType: (value) => validateRequired(value, "الدعم المطلوب"),
@@ -508,7 +514,7 @@ export const organizationFormSchema = {
     bank: (value) => validateRequired(value, "اسم البنك"),
     bankCert: (value) => validateFile(value, {
         required: true,
-        maxSizeMB: 5,
+        maxSizeMB: value?.type === "application/pdf" || value?.name?.toLowerCase().endsWith(".pdf") ? 1024 : 5,
         allowedTypes: ["application/pdf", "image/*"]
     }),
 };

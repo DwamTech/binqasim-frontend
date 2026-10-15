@@ -1,6 +1,9 @@
 "use client";
+import SupportPhoneInput from "./SupportPhoneInput";
+import { FiUser, FiBriefcase } from "react-icons/fi";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useId } from "react";
+import { createPortal } from "react-dom";
 import styles from "./SupportTabs.module.css";
 import CustomSelect from "./CustomSelect";
 import {
@@ -41,6 +44,35 @@ function Toast({ message, type, onClose }) {
 // ════════════════════════════════════════════════════════════════════════════
 function SuccessModal({ isOpen, onClose, requestNumber, phoneNumber, message }) {
   const [copied, setCopied] = useState(false);
+  const titleId = useId();
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialogRef.current?.focus({ preventScroll: true });
+    const handleKey = (event) => {
+      if (event.key === "Escape") onClose();
+      if (event.key !== "Tab") return;
+      const buttons = dialogRef.current?.querySelectorAll("button:not([disabled])");
+      if (!buttons?.length) return;
+      const first = buttons[0];
+      const last = buttons[buttons.length - 1];
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKey);
+      previousFocus?.focus?.({ preventScroll: true });
+    };
+  }, [isOpen, onClose]);
 
   const copyToClipboard = async () => {
     try {
@@ -60,11 +92,11 @@ function SuccessModal({ isOpen, onClose, requestNumber, phoneNumber, message }) 
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === "undefined") return null;
 
-  return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.successModal} onClick={(e) => e.stopPropagation()}>
+  return createPortal(
+    <div className={styles.modalOverlay} onClick={onClose} dir="rtl">
+      <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={styles.successModal} onClick={(e) => e.stopPropagation()}>
         {/* Success Animation */}
         <div className={styles.successIconWrapper}>
           <div className={styles.successIconCircle}>
@@ -76,8 +108,8 @@ function SuccessModal({ isOpen, onClose, requestNumber, phoneNumber, message }) 
         </div>
 
         {/* Title */}
-        <h2 className={styles.successTitle}>
-          🎉 تم إرسال طلبك بنجاح!
+        <h2 id={titleId} className={styles.successTitle}>
+          تم إرسال طلبك بنجاح!
         </h2>
 
         {/* Message */}
@@ -133,7 +165,7 @@ function SuccessModal({ isOpen, onClose, requestNumber, phoneNumber, message }) 
           إغلاق
         </button>
       </div>
-    </div>
+    </div>, document.body
   );
 }
 
@@ -163,6 +195,7 @@ function FormField({ label, required, error, touched, children, className = "" }
 // FILE INPUT COMPONENT
 // ════════════════════════════════════════════════════════════════════════════
 function FileInput({ accept, onChange, value, error }) {
+  const inputId = useId();
   const [fileName, setFileName] = useState("");
 
   const handleChange = (e) => {
@@ -178,10 +211,10 @@ function FileInput({ accept, onChange, value, error }) {
         accept={accept}
         onChange={handleChange}
         className={styles.fileHidden}
-        id={`file-${Math.random().toString(36).substr(2, 9)}`}
+        id={inputId}
       />
       <label
-        htmlFor={`file-${Math.random().toString(36).substr(2, 9)}`}
+        htmlFor={inputId}
         className={`${styles.fileLabel} ${error ? styles.fileLabelError : ""} ${fileName ? styles.fileLabelSelected : ""}`}
       >
         <span className={styles.fileIcon}>📎</span>
@@ -197,7 +230,7 @@ function FileInput({ accept, onChange, value, error }) {
 // ════════════════════════════════════════════════════════════════════════════
 // INDIVIDUAL FORM COMPONENT
 // ════════════════════════════════════════════════════════════════════════════
-function IndividualForm() {
+function IndividualForm({ showTabs }) {
   const formRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
@@ -421,8 +454,9 @@ function IndividualForm() {
         dir="rtl"
         noValidate
         id="individual-panel"
-        role="tabpanel"
-        aria-labelledby="individual-tab"
+        role={showTabs ? "tabpanel" : undefined}
+        aria-labelledby={showTabs ? "individual-tab" : undefined}
+        aria-label={showTabs ? undefined : "طلب دعم فرد"}
       >
         {/* ═══════════════════════════════════════════════════════════════
             PERSONAL INFORMATION SECTION
@@ -552,7 +586,7 @@ function IndividualForm() {
         </div>
 
         <FormField label="رقم الاتصال" required error={errors.phone} touched={touched.phone}>
-          <input
+          <SupportPhoneInput
             name="phone"
             type="tel"
             className={styles.input}
@@ -565,7 +599,7 @@ function IndividualForm() {
         </FormField>
 
         <FormField label="رقم الواتساب" error={errors.whatsapp} touched={touched.whatsapp}>
-          <input
+          <SupportPhoneInput
             name="whatsapp"
             type="tel"
             className={styles.input}
@@ -880,7 +914,7 @@ function IndividualForm() {
 // ════════════════════════════════════════════════════════════════════════════
 // ORGANIZATION FORM COMPONENT
 // ════════════════════════════════════════════════════════════════════════════
-function OrganizationForm() {
+function OrganizationForm({ showTabs }) {
   const formRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
@@ -1123,8 +1157,9 @@ function OrganizationForm() {
         dir="rtl"
         noValidate
         id="organization-panel"
-        role="tabpanel"
-        aria-labelledby="organization-tab"
+        role={showTabs ? "tabpanel" : undefined}
+        aria-labelledby={showTabs ? "organization-tab" : undefined}
+        aria-label={showTabs ? undefined : "طلب دعم مؤسسة"}
       >
         {/* ═══════════════════════════════════════════════════════════════
             ORGANIZATION INFORMATION SECTION
@@ -1191,7 +1226,7 @@ function OrganizationForm() {
         </FormField>
 
         <FormField label="الجوال" required error={errors.phone} touched={touched.phone}>
-          <input
+          <SupportPhoneInput
             name="phone"
             type="tel"
             className={styles.input}
@@ -1215,7 +1250,7 @@ function OrganizationForm() {
         </FormField>
 
         <FormField label="جوال المدير" required error={errors.ceoPhone} touched={touched.ceoPhone}>
-          <input
+          <SupportPhoneInput
             name="ceoPhone"
             type="tel"
             className={styles.input}
@@ -1228,7 +1263,7 @@ function OrganizationForm() {
         </FormField>
 
         <FormField label="رقم الواتساب" error={errors.whatsapp} touched={touched.whatsapp}>
-          <input
+          <SupportPhoneInput
             name="whatsapp"
             type="tel"
             className={styles.input}
@@ -1366,7 +1401,7 @@ function OrganizationForm() {
         </FormField>
 
         <FormField label="جوال مدير المشروع" required error={errors.projectManagerPhone} touched={touched.projectManagerPhone}>
-          <input
+          <SupportPhoneInput
             name="projectManagerPhone"
             type="tel"
             className={styles.input}
@@ -1591,37 +1626,70 @@ function OrganizationForm() {
 // ════════════════════════════════════════════════════════════════════════════
 // MAIN SUPPORT TABS COMPONENT
 // ════════════════════════════════════════════════════════════════════════════
-export default function SupportTabs() {
+export default function SupportTabs({ initialSettings }) {
   const [tab, setTab] = useState("individual");
+  const [settings, setSettings] = useState(initialSettings);
+  const individualEnabled = settings.site_status !== "closed" && settings.individual_support_enabled === true;
+  const institutionalEnabled = settings.site_status !== "closed" && settings.institutional_support_enabled === true;
+  const activeTab = tab === "individual" && individualEnabled ? "individual"
+    : tab === "organization" && institutionalEnabled ? "organization"
+      : individualEnabled ? "individual" : "organization";
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const refresh = () => {
+      if (document.visibilityState === "hidden") return;
+      SupportService.getSettings(controller.signal).then((next) => {
+        if (!controller.signal.aborted) setSettings(next);
+      }).catch(() => {});
+    };
+    refresh();
+    const timer = setInterval(refresh, 15000);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      controller.abort();
+      clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, []);
+
+  if (!individualEnabled && !institutionalEnabled) {
+    return <section className={styles.section} dir="rtl"><div className={styles.container}>
+      <h2>استقبال طلبات الدعم متوقف حاليًا</h2>
+      <p>يمكنك متابعة حالة طلب سابق من خلال خدمة التحقق من الطلب.</p>
+    </div></section>;
+  }
 
   return (
     <section className={styles.section} dir="rtl">
       <div className={styles.container}>
-        <div className={styles.tabs} role="tablist" aria-label="اختيار نوع الطلب">
+        {individualEnabled && institutionalEnabled && <div className={styles.tabs} role="tablist" aria-label="اختيار نوع الطلب">
           <button
             role="tab"
-            aria-selected={tab === "individual"}
+            aria-selected={activeTab === "individual"}
             aria-controls="individual-panel"
             id="individual-tab"
-            className={`${styles.tabBtn} ${tab === "individual" ? styles.tabBtnActive : ""}`}
+            className={`${styles.tabBtn} ${activeTab === "individual" ? styles.tabBtnActive : ""}`}
             onClick={() => setTab("individual")}
           >
-            <span className={styles.tabIcon}>👤</span>
+            <span className={styles.tabIcon} aria-hidden="true"><FiUser /></span>
             طلب فرد
           </button>
           <button
             role="tab"
-            aria-selected={tab === "organization"}
+            aria-selected={activeTab === "organization"}
             aria-controls="organization-panel"
             id="organization-tab"
-            className={`${styles.tabBtn} ${tab === "organization" ? styles.tabBtnActive : ""}`}
+            className={`${styles.tabBtn} ${activeTab === "organization" ? styles.tabBtnActive : ""}`}
             onClick={() => setTab("organization")}
           >
-            <span className={styles.tabIcon}>🏢</span>
+            <span className={styles.tabIcon} aria-hidden="true"><FiBriefcase /></span>
             طلب مؤسسة
           </button>
-        </div>
-        {tab === "individual" ? <IndividualForm /> : <OrganizationForm />}
+        </div>}
+        {activeTab === "individual" ? <IndividualForm showTabs={individualEnabled && institutionalEnabled} /> : <OrganizationForm showTabs={individualEnabled && institutionalEnabled} />}
       </div>
     </section>
   );

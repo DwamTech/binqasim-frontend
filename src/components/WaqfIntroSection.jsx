@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { FiCheck, FiEye, FiHeart, FiMessageCircle } from "react-icons/fi";
 import styles from "./WaqfIntroSection.module.css";
 
@@ -30,43 +31,40 @@ const objectives = [
 
 export default function WaqfIntroSection() {
   return (
-    <section className={styles.about}>
-      <div className={styles.aboutInner}>
-        <header className={styles.aboutHeader}>
-          <span className={styles.sectionKicker}>عن الوقف</span>
-          <h2 className={styles.aboutTitle}>ما هو وقف عبد الله بن قاسم ثاني؟</h2>
-          <span className={styles.titleAccent} aria-hidden />
-        </header>
-
-        <div className={styles.identityCards}>
-          {identityItems.map(({ title, description, Icon }) => (
-            <article className={styles.identityCard} key={title}>
-              <span className={styles.identityIcon}><Icon aria-hidden /></span>
-              <div>
-                <h3>{title}</h3>
-                <p>{description}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className={styles.objectivesPanel}>
-          <div className={styles.objectivesHeading}>
-            <span className={styles.objectivesNumber}>06</span>
-            <div>
-              <span>مسارات تصنع الأثر</span>
-              <h3>أهداف الوقف</h3>
+    <section id="about-waqf" className={styles.about} aria-labelledby="home-about-title">
+      <div className={styles.inner}>
+        <div className={styles.story}>
+          <div className={styles.content}>
+            <span className={styles.kicker} data-reveal>عن الوقف</span>
+            <h2 id="home-about-title" data-reveal data-reveal-delay="100">ما هو وقف عبد الله بن قاسم ثاني؟</h2>
+            <div className={styles.values}>
+              {identityItems.map(({ title, description, Icon }, index) => (
+                <article className={styles.valueCard} key={title} data-reveal data-reveal-delay={160 + index * 100}>
+                  <div className={styles.valueHeading}><span className={styles.icon}><Icon aria-hidden /></span><h3>{title}</h3></div>
+                  <p>{description}</p>
+                </article>
+              ))}
             </div>
           </div>
-          <ul className={styles.objectivesList}>
-            {objectives.map((objective) => (
-              <li key={objective}>
-                <FiCheck aria-hidden />
-                <span>{objective}</span>
-              </li>
-            ))}
-          </ul>
+          <div className={styles.visual} data-reveal data-reveal-delay="200">
+            <div className={styles.photo}>
+              <Image src="/about/4484.png" alt="" fill sizes="(max-width: 760px) 90vw, 45vw" className={styles.photoImage} />
+            </div>
+            <div className={styles.identity}>
+              <Image src="/ben-logo.png" alt="" width={154} height={59} />
+            </div>
+          </div>
         </div>
+          <div className={styles.objectives}>
+            <div className={styles.objectivesHeading}><span className={styles.objectivesCount}>06</span><h3>أهداف الوقف</h3></div>
+            <ul className={styles.objectivesList}>
+              {objectives.map((objective, index) => (
+                <li className={styles.objective} key={objective} data-reveal data-reveal-delay={index * 70}>
+                  <FiCheck aria-hidden /><span>{objective}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
       </div>
     </section>
   );

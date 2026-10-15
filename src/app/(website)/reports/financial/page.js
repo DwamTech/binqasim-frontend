@@ -1,4 +1,6 @@
-import Image from "next/image";
+import { getGovernance, pageNumber } from "@/services/publicWebsite";
+import PublicPagination from "@/components/PublicPagination";
+import Image from "@/components/CmsImage";
 import Link from "next/link";
 import {
   FiArrowLeft,
@@ -14,22 +16,13 @@ export const metadata = {
   description: "مكتبة التقارير المالية وتقارير مشروعات وقف عبد الله بن قاسم آل ثاني.",
 };
 
-const reports = [
-  {
-    title: "تقرير أضاحي",
-    description: "تقرير مصور يوثق مشروع الأضاحي وأثره، مع إمكانية تصفح جميع صفحات التقرير وتنزيل نسخة PDF.",
-    image: "/aladha.jpg",
-    date: "17 يناير، 2025",
-    type: "تقرير مصور",
-    href: "/reports/adahi",
-    file: "/adahi-report-1444.pdf",
-  },
-];
 
-export default function FinancialReportsPage() {
+export default async function FinancialReportsPage({ searchParams }) {
+  const query = await searchParams;
+  const { items: reports, meta } = await getGovernance("financial-reports", pageNumber(query?.page));
   return (
     <main className={styles.page}>
-      <section className={styles.hero}>
+      <section className={styles.hero} data-site-hero>
         <div className={styles.heroOverlay} />
         <div className={styles.heroPattern} aria-hidden />
         <div className={`${styles.container} ${styles.heroGrid}`}>
@@ -51,7 +44,7 @@ export default function FinancialReportsPage() {
                 <span><FiBarChart2 /></span>
                 <small>مكتبة الوقف</small>
               </div>
-              <div className={styles.visualCount}>{String(reports.length).padStart(2, "0")}</div>
+              <div className={styles.visualCount}>{String(meta.total).padStart(2, "0")}</div>
               <strong>تقرير متاح</strong>
               <div className={styles.visualBars}>
                 <i />
@@ -76,9 +69,11 @@ export default function FinancialReportsPage() {
               <h2>مكتبة التقارير</h2>
               <p>يمكنك فتح التقرير وتصفّح صفحاته داخل الموقع أو تنزيل نسخة للاحتفاظ بها.</p>
             </div>
-            <span className={styles.count}>{String(reports.length).padStart(2, "0")} تقرير</span>
+            <span className={styles.count}>{String(meta.total).padStart(2, "0")} تقرير</span>
           </header>
 
+          <PublicPagination meta={meta} path="/reports/financial" />
+          {reports.length === 0 && <p>?? ???? ??????? ?????? ??????.</p>}
           <div className={styles.reportsGrid}>
             {reports.map((report, index) => (
               <article className={styles.reportCard} key={report.href}>
@@ -91,22 +86,21 @@ export default function FinancialReportsPage() {
                     className={styles.cardImage}
                   />
                   <span className={styles.typeBadge}><FiFileText aria-hidden />{report.type}</span>
-                  <span className={styles.reportNumber}>{String(index + 1).padStart(2, "0")}</span>
+                  <span className={styles.reportNumber}>{String((meta.current_page - 1) * meta.per_page + index + 1).padStart(2, "0")}</span>
                 </Link>
 
                 <div className={styles.cardBody}>
                   <div className={styles.date}><FiCalendar aria-hidden />{report.date}</div>
                   <h3><Link href={report.href}>{report.title}</Link></h3>
-                  <p>{report.description}</p>
 
                   <div className={styles.cardActions}>
                     <Link href={report.href} className={styles.viewButton}>
                       عرض التقرير
                       <FiArrowLeft aria-hidden />
                     </Link>
-                    <a href={report.file} download className={styles.downloadButton} aria-label={`تنزيل ${report.title}`}>
+                    {report.download_allowed && report.file && <a href={report.file} download className={styles.downloadButton} aria-label={`تنزيل ${report.title}`}>
                       <FiDownload aria-hidden />
-                    </a>
+                    </a>}
                   </div>
                 </div>
               </article>

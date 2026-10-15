@@ -1,80 +1,27 @@
-import Image from "next/image";
+import Image from "@/components/CmsImage";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FiArrowLeft, FiCalendar, FiHome } from "react-icons/fi";
 import styles from "./page.module.css";
-import { newsItems } from "../newsData";
+import { getNewsItem } from "@/services/publicWebsite";
 
 export const dynamicParams = true;
 
-export function generateStaticParams() {
-  return newsItems.map((item) => ({ slug: item.slug }));
-}
-
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const item = newsItems.find((n) => n.slug === slug);
+  const item = await getNewsItem(slug);
   if (!item) return { title: "خبر غير موجود | وقف عبد الله بن قاسم" };
   return { title: `${item.title} | وقف عبد الله بن قاسم` };
 }
 
-const renderBlock = (block, idx) => {
-  if (block.type === "paragraph") {
-    return (
-      <p key={idx} className={styles.paragraph}>
-        {block.value}
-      </p>
-    );
-  }
-
-  if (block.type === "image") {
-    return (
-      <div key={idx} className={styles.imageBlock}>
-        <Image
-          src={block.src}
-          alt={block.alt || ""}
-          fill
-          sizes="(max-width: 600px) 100vw, 980px"
-          style={{ objectFit: "cover" }}
-        />
-      </div>
-    );
-  }
-
-  if (block.type === "embed") {
-    if (!block.src) {
-      return (
-        <div key={idx} className={styles.embedWrap}>
-          <div className={styles.videoPlaceholder}>{block.title || "مشغل الفيديو"}</div>
-        </div>
-      );
-    }
-    return (
-      <div key={idx} className={styles.embedWrap}>
-        <iframe
-          className={styles.embed}
-          src={block.src}
-          title={block.title || "فيديو"}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
-      </div>
-    );
-  }
-
-  return null;
-};
-
 export default async function NewsDetailsPage({ params }) {
   const { slug } = await params;
-  const item = newsItems.find((n) => n.slug === slug);
+  const item = await getNewsItem(slug);
   if (!item) notFound();
 
   return (
     <div className={styles.page}>
-      <section className={styles.hero}>
+      <section className={styles.hero} data-site-hero>
         <Image
           src={item.coverSrc}
           alt=""
@@ -111,7 +58,16 @@ export default async function NewsDetailsPage({ params }) {
 
       <section className={styles.section} id="article-content">
         <div className={styles.container}>
-          <article className={styles.content}>{item.blocks.map(renderBlock)}</article>
+          <article className={styles.content}>
+            <div dangerouslySetInnerHTML={{ __html: item.content }} />
+            {item.media.map((media) => media.type === "gallery_image" ? (
+              <div key={media.id} className={styles.imageBlock}>
+                <Image src={media.url} alt={media.original_name || item.title} fill sizes="(max-width: 600px) 100vw, 980px" style={{ objectFit: "contain" }} />
+              </div>
+            ) : media.type === "video" ? <video key={media.id} src={media.url} controls style={{ width: "100%" }} />
+              : media.type === "audio" ? <audio key={media.id} src={media.url} controls />
+                : <p key={media.id}><a href={media.url}>{media.original_name || "تحميل المرفق"}</a></p>)}
+          </article>
 
           <div className={styles.backRow}>
             <Link className={styles.backLink} href="/news">

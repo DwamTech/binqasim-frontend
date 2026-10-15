@@ -63,6 +63,7 @@ export default function AdminLayout({
     return (
         <html lang="ar" dir="rtl">
             <head>
+                <link rel="icon" type="image/png" href="/ben-icon.png" />
                 <title>لوحة التحكم</title>
             </head>
             <body className={`${cairo.className} bg-gray-50`}>

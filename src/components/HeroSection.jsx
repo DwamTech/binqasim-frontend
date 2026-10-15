@@ -3,7 +3,7 @@ import styles from "./HeroSection.module.css";
 
 export default function HeroSection({ title, imageSrc, imageAlt, align = "end" }) {
   return (
-    <section className={styles.hero}>
+    <section className={styles.hero} data-site-hero>
       <Image
         src={imageSrc}
         alt={imageAlt}
@@ -15,7 +15,7 @@ export default function HeroSection({ title, imageSrc, imageAlt, align = "end" }
       <div
         className={styles.heroInner}
         style={{
-          justifyContent:
+          "--hero-alignment":
             align === "start" ? "flex-start" : align === "center" ? "center" : "flex-end",
         }}
       >

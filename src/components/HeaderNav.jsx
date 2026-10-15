@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { searchSite } from "../services/siteSearch";
 import styles from "../app/(website)/layout.module.css";
 import {
   FaHome,
@@ -46,13 +47,17 @@ const searchablePages = [
   { title: "متابعة طلب دعم", href: "/support/check" },
 ];
 
-export default function HeaderNav() {
+export default function HeaderNav({ email = "" }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [govOpen, setGovOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchPage, setSearchPage] = useState(1);
+  const [searchData, setSearchData] = useState({ data: [], meta: {} });
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
   const isHome = pathname === "/";
   const isNews = pathname.startsWith("/news");
   const isGovernmentActive =
@@ -65,12 +70,29 @@ export default function HeaderNav() {
     pathname.startsWith("/suggestions") ||
     pathname.startsWith("/complaints");
   const isSupportActive = pathname.startsWith("/support");
-  const normalizedQuery = searchQuery.trim().toLocaleLowerCase("ar");
-  const searchResults = normalizedQuery
-    ? searchablePages.filter((page) =>
-        page.title.toLocaleLowerCase("ar").includes(normalizedQuery)
-      )
-    : searchablePages;
+  const normalizedQuery = searchQuery.trim();
+  const searchResults = normalizedQuery ? searchData.data : searchablePages;
+
+  useEffect(() => {
+    if (!searchOpen || normalizedQuery.length < 2) return;
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const result = await searchSite(normalizedQuery, searchPage, controller.signal);
+        if (controller.signal.aborted) return;
+        setSearchData((previous) => ({
+          data: searchPage === 1 ? result.data : [...previous.data, ...result.data],
+          meta: result.meta,
+        }));
+        setSearchError("");
+      } catch (error) {
+        if (!controller.signal.aborted) setSearchError(error.message);
+      } finally {
+        if (!controller.signal.aborted) setSearchLoading(false);
+      }
+    }, 300);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [normalizedQuery, searchPage, searchOpen]);
 
   useEffect(() => {
     const closeOnEscape = (event) => {
@@ -87,8 +109,8 @@ export default function HeaderNav() {
           <Link href="/"><FaHome className={styles.navIcon} aria-hidden />الرئيسية</Link>
         </li>
         <li className={`${styles.navItem} ${styles.hasDropdown} ${isGovernmentActive ? styles.navItemActive : ""}`}>
-          <a href="#"><FaLandmark className={styles.navIcon} aria-hidden />الحكومه<FaChevronDown className={styles.chevron} aria-hidden /></a>
-          <div className={styles.dropdownMenu}>
+          <button type="button" className={styles.navDropdownButton} aria-expanded={govOpen} onClick={() => setGovOpen((open) => !open)}><FaLandmark className={styles.navIcon} aria-hidden />الحوكمة<FaChevronDown className={styles.chevron} aria-hidden /></button>
+          <div className={`${styles.dropdownMenu} ${govOpen ? styles.dropdownOpen : ""}`}>
             <Link href="/about" className={pathname.startsWith("/about") ? styles.dropdownActive : ""}><FaInfoCircle className={styles.iconPrimary} />عن الوقف</Link>
             <Link href="/books-policies" className={pathname.startsWith("/books-policies") ? styles.dropdownActive : ""}><FaBook className={styles.iconSecondary} />اللوائح والسياسات</Link>
             <Link href="/funds" className={pathname.startsWith("/funds") ? styles.dropdownActive : ""}><FaCoins className={styles.iconPrimary} />المصارف الشرعية</Link>
@@ -100,14 +122,14 @@ export default function HeaderNav() {
           <Link href="/news"><FaThumbtack className={styles.navIcon} aria-hidden />أخبار الوقف</Link>
         </li>
         <li className={`${styles.navItem} ${styles.hasDropdown} ${isContactActive ? styles.navItemActive : ""}`}>
-          <a href="#"><FaPhone className={styles.navIcon} aria-hidden />تواصل معنا<FaChevronDown className={styles.chevron} aria-hidden /></a>
-          <div className={`${styles.dropdownMenu} ${styles.dropdownWide}`}>
+          <button type="button" className={styles.navDropdownButton} aria-expanded={contactOpen} onClick={() => setContactOpen((open) => !open)}><FaPhone className={styles.navIcon} aria-hidden />تواصل معنا<FaChevronDown className={styles.chevron} aria-hidden /></button>
+          <div className={`${styles.dropdownMenu} ${styles.dropdownWide} ${contactOpen ? styles.dropdownOpen : ""}`}>
             <a href="/satisfaction" className={pathname.startsWith("/satisfaction") ? styles.dropdownActive : ""}><FaSmile className={styles.iconSuccess} />تقييم رضا المستفيدين</a>
             <a href="/suggestions" className={pathname.startsWith("/suggestions") ? styles.dropdownActive : ""}><FaLightbulb className={styles.iconIdea} />صندوق الاقتراحات</a>
             <a href="/complaints" className={pathname.startsWith("/complaints") ? styles.dropdownActive : ""}><FaExclamationTriangle className={styles.iconSuccess} />صندوق الشكاوي</a>
           </div>
         </li>
-        <li className={`${styles.navItem} ${isSupportActive ? styles.navItemActive : ""}`}>
+        <li className={`${styles.navItem} ${styles.supportNav} ${isSupportActive ? styles.navItemActive : ""}`}>
           <Link href="/support"><FaClipboard className={styles.navIcon} aria-hidden />طلبات الدعم</Link>
         </li>
       </ul>
@@ -116,7 +138,7 @@ export default function HeaderNav() {
         className={styles.searchButton}
         aria-label="فتح البحث"
         aria-expanded={searchOpen}
-        onClick={() => setSearchOpen(true)}
+        onClick={() => { setSearchLoading(normalizedQuery.length >= 2); setSearchPage(1); setSearchOpen(true); }}
       >
         <FaSearch aria-hidden />
       </button>
@@ -144,7 +166,7 @@ export default function HeaderNav() {
             <div className={styles.searchDialogHeader}>
               <div>
                 <span className={styles.searchEyebrow}>بحث الموقع</span>
-                <h2 id="search-dialog-title">إلى أين تريد الذهاب؟</h2>
+                <h2 id="search-dialog-title">ابحث في محتوى الموقع</h2>
               </div>
               <button
                 type="button"
@@ -160,8 +182,16 @@ export default function HeaderNav() {
               <input
                 type="search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="ابحث عن صفحة أو خدمة..."
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                  setSearchPage(1);
+                  setSearchData({ data: [], meta: {} });
+                  setSearchError("");
+                  setSearchLoading(event.target.value.trim().length >= 2);
+                }}
+                placeholder="ابحث عن خبر، كتاب، تقرير أو خدمة..."
+                aria-label="البحث في محتوى الموقع"
+                maxLength={150}
                 autoFocus
               />
             </label>
@@ -175,11 +205,20 @@ export default function HeaderNav() {
                     onClick={() => setSearchOpen(false)}
                   >
                     <FaSearch aria-hidden />
-                    <span>{page.title}</span>
+                    <span className={styles.searchResultText}>
+                      {page.type && <small>{page.type}</small>}
+                      <strong>{page.title}</strong>
+                      {page.excerpt && <span>{page.excerpt}</span>}
+                    </span>
                   </Link>
                 ))
               ) : (
-                <p className={styles.noSearchResults}>لا توجد نتائج مطابقة للبحث.</p>
+                !searchLoading && !searchError && <p className={styles.noSearchResults}>{normalizedQuery.length < 2 ? "اكتب حرفين على الأقل للبحث." : "لا توجد نتائج مطابقة للبحث."}</p>
+              )}
+              {searchLoading && <p className={styles.noSearchResults} role="status">جارٍ البحث...</p>}
+              {searchError && <p className={styles.noSearchResults} role="alert">{searchError}</p>}
+              {!searchLoading && !searchError && searchData.meta.current_page < searchData.meta.last_page && (
+                <button type="button" className={styles.searchMore} onClick={() => { setSearchLoading(true); setSearchPage((page) => page + 1); }}>عرض المزيد من النتائج ({searchData.meta.total})</button>
               )}
             </div>
           </section>
@@ -218,7 +257,7 @@ export default function HeaderNav() {
             aria-expanded={govOpen}
             onClick={() => setGovOpen((v) => !v)}
           >
-            <FaLandmark className={styles.iconSecondary} />الحكومه
+            <FaLandmark className={styles.iconSecondary} />الحوكمة
             <FaChevronDown className={`${styles.chevron} ${govOpen ? styles.rotate : ""}`} aria-hidden />
           </button>
           <div className={`${styles.sidebarSubmenu} ${govOpen ? styles.show : ""}`}>
@@ -266,8 +305,8 @@ export default function HeaderNav() {
           </Link>
         </div>
         <div className={styles.sidebarFooter}>
-          <a href="mailto:info@wqfalthani.com" className={styles.sidebarEmail}>
-            <FaEnvelope />info@wqfalthani.com
+          <a href={`mailto:${email}`} className={styles.sidebarEmail}>
+            <FaEnvelope />{email}
           </a>
           <div className={styles.sidebarSocial}>
             <a href="#" aria-label="YouTube"><FaYoutube /></a>

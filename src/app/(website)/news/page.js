@@ -1,27 +1,30 @@
-import Image from "next/image";
+import Image from "@/components/CmsImage";
 import Link from "next/link";
 import { FiArrowLeft, FiCalendar, FiCamera } from "react-icons/fi";
 import styles from "./page.module.css";
-import { newsItems } from "./newsData";
+import { getNews, pageNumber } from "@/services/publicWebsite";
+import PublicPagination from "@/components/PublicPagination";
 
 export const metadata = {
   title: "أخبار الوقف | وقف عبد الله بن قاسم",
 };
 
-export default function NewsPage() {
+export default async function NewsPage({ searchParams }) {
+  const query = await searchParams;
+  const { items: newsItems, meta } = await getNews(pageNumber(query?.page));
   return (
     <div className={styles.page}>
-      <section className={styles.hero}>
+      <section className={styles.hero} data-site-hero>
         <div className={styles.heroPattern} aria-hidden />
         <div className={`${styles.container} ${styles.heroGrid}`}>
           <div className={styles.heroContent}>
             <span className={styles.heroEyebrow}><FiCamera aria-hidden />المركز الإعلامي</span>
             <h1>أخبار <span>الوقف</span></h1>
             <p>نافذة توثق مبادرات الوقف واجتماعاته وبرامجه، وتروي أثر العمل الذي نصنعه مع شركائنا في المجتمع.</p>
-            <div className={styles.heroStats}>
-              <strong>{String(newsItems.length).padStart(2, "0")}</strong>
+            {/* <div className={styles.heroStats}>
+              <strong>{String(meta.total).padStart(2, "0")}</strong>
               <span>أخبار موثقة بالصور</span>
-            </div>
+            </div> */}
           </div>
 
           <div className={styles.heroMosaic}>
@@ -53,10 +56,11 @@ export default function NewsPage() {
               <h2>آخر الأخبار</h2>
               <p>تابع أخبار الوقف ومبادراته وشراكاته المجتمعية.</p>
             </div>
-            <span className={styles.count}>{String(newsItems.length).padStart(2, "0")} أخبار</span>
+            <span className={styles.count}>{String(meta.total).padStart(2, "0")} أخبار</span>
           </header>
 
           <div className={styles.grid}>
+            {newsItems.length === 0 && <p>لا توجد أخبار منشورة حاليًا.</p>}
             {newsItems.map((item, idx) => (
               <Link
                 key={item.slug}
@@ -82,6 +86,7 @@ export default function NewsPage() {
               </Link>
             ))}
           </div>
+          <PublicPagination meta={meta} path="/news" />
         </div>
       </section>
     </div>

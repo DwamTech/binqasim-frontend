@@ -359,6 +359,11 @@
 }
 
 @media (max-width: 800px) {
+  .hero { text-align: center; }
+  .breadcrumbs { justify-content: center; }
+  .heroContent { width: 100%; margin-inline: auto; justify-self: center; }
+  .heroContent h1, .heroContent p { margin-inline: auto; }
+  .meta, .actions { justify-content: center; }
   .heroGrid {
     grid-template-columns: 1fr;
   }
@@ -423,3 +428,7 @@
     padding-inline: 12px;
   }
 }
+
+.documentIntroduction { margin-bottom: 32px; padding: clamp(20px, 4vw, 40px); background: #fff; border: 1px solid #e0e6df; border-radius: 20px; color: #24392f; }
+.documentIntroduction h2 { margin: 0 0 18px; font-size: 26px; }
+.documentIntroduction p { margin: 0; line-height: 2; white-space: pre-line; overflow-wrap: anywhere; }

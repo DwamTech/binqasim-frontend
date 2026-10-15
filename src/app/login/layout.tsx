@@ -16,6 +16,7 @@ export default function LoginLayout({
     return (
         <html lang="ar" dir="rtl">
             <head>
+                <link rel="icon" type="image/png" href="/ben-icon.png" />
                 <title>تسجيل الدخول - لوحة التحكم</title>
             </head>
             <body className={cairo.className}>

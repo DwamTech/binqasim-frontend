@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import HeroSection from "../../../components/HeroSection";
+import { FiMessageCircle, FiArrowDown, FiHeart } from "react-icons/fi";
 import { FaStar, FaRegStar, FaStarHalfAlt, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import styles from "./page.module.css";
 import { PublicFeedbackService } from "@/services/publicFeedbackService";
@@ -105,98 +105,67 @@ export default function SatisfactionPage() {
 
   return (
     <main className={styles.main}>
-      {/* Toast Notification */}
       {toast && (
-        <div className={`${styles.toast} ${styles[`toast${toast.type}`]}`}>
-          {toast.type === "success" ? <FaCheckCircle /> : <FaTimesCircle />}
+        <div className={`${styles.toast} ${styles[`toast${toast.type}`]}`} role={toast.type === "error" ? "alert" : "status"}>
+          {toast.type === "success" ? <FaCheckCircle aria-hidden /> : <FaTimesCircle aria-hidden />}
           <span>{toast.message}</span>
-          <button onClick={() => setToast(null)} className={styles.toastClose}>×</button>
+          <button type="button" aria-label="إغلاق الرسالة" onClick={() => setToast(null)} className={styles.toastClose}>×</button>
         </div>
       )}
-
-      <HeroSection
-        title="تقيـيم رضا المستـفيديـن"
-        imageSrc="/75884be2-3e9d-4126-ace3-770ef0c2f071_16x9_1200x676.webp"
-        imageAlt="تقييم رضا المستفيدين"
-        align="center"
-      />
-
-      <section className={styles.introSection}>
-        <div className={styles.introCard}>
-          <h2 className={styles.introTitle}>تقييم رضا المستفيدين</h2>
-          <p className={styles.introText}>
-            من أهم أسباب نمو قدراتنا ومواجهة تحدياتنا أن نتلقى مدى رضا المستفيدين منّا بكل سرور
-            حتى نضع في خططنا المستقبلية ما يميّزنا ويزيد من رضاكم
-          </p>
+      <section className={styles.hero} data-site-hero>
+        <div className={styles.heroInner}>
+          <div className={styles.heroContent}>
+            <span className={styles.eyebrow}><FiMessageCircle aria-hidden />تقييم رضا المستفيدين</span>
+            <h1>تقيـيم رضا<br /><span>المستـفيديـن</span></h1>
+            <a href="#rating" className={styles.heroLink}>اضف تقييمك.. <FiArrowDown aria-hidden /></a>
+          </div>
+          <div className={styles.heroVisual} aria-hidden="true">
+            <div className={styles.visualBack} />
+            <div className={styles.visualCard}><FiMessageCircle className={styles.visualIcon} /><div className={styles.visualStars}>{stars.map((star) => <FaStar key={star} />)}</div><div className={styles.visualLines}><i /><i /></div></div>
+          </div>
         </div>
       </section>
-
-      <section className={styles.ratingSection}>
-        <div className={styles.ratingInner}>
-          {/* Rating Header */}
-          <div className={styles.ratingHeader}>
-            <span className={styles.label}>
-              {hasRated ? "شكراً لتقييمك! ⭐" : "اضف تقييمك.."}
-            </span>
+      <section id="rating" className={styles.feedbackSection} aria-labelledby="rating-title">
+        <div className={styles.feedbackGrid}>
+          <div className={styles.introCard}>
+            <span className={styles.introIcon}><FiHeart aria-hidden /></span>
+            <h2 className={styles.introTitle}>تقييم رضا المستفيدين</h2>
+            <p className={styles.introText}>من أهم أسباب نمو قدراتنا ومواجهة تحدياتنا أن نتلقى مدى رضا المستفيدين منّا بكل سرور
+              حتى نضع في خططنا المستقبلية ما يميّزنا ويزيد من رضاكم</p>
+            <div className={styles.introAccent} aria-hidden><i /><i /><i /></div>
           </div>
-
-          {/* Average Stars Display */}
-          <div className={styles.placeholderStars} aria-hidden="true">
-            {loading ? (
-              <span className={styles.loadingText}>جاري التحميل...</span>
-            ) : (
-              renderAverageStars()
-            )}
-          </div>
-
-          {/* Interactive Stars */}
-          <div
-            className={`${styles.stars} ${hasRated ? styles.starsDisabled : ""} ${submitting ? styles.starsSubmitting : ""}`}
-            role="radiogroup"
-            aria-label="اختيار التقييم"
-          >
-            {stars.map((i) => {
-              const active = (hover || rating) >= i;
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  className={`${styles.starBtn} ${active ? styles.starBtnActive : ""}`}
+          <div className={styles.ratingInner} aria-busy={submitting}>
+            <span className={`${styles.ratingIcon} ${hasRated ? styles.successIcon : ""}`} aria-hidden>{hasRated ? <FaCheckCircle /> : <FaRegStar />}</span>
+            <h2 id="rating-title" className={styles.label}>{hasRated ? "شكراً لتقييمك! ⭐" : "اضف تقييمك.."}</h2>
+            {!hasRated && <p className={styles.hint}>اختيار النجمة يرسل تقييمك مباشرة.</p>}
+            <div className={`${styles.stars} ${hasRated ? styles.starsDisabled : ""} ${submitting ? styles.starsSubmitting : ""}`}
+              role="group" aria-label="اختيار التقييم" onMouseLeave={() => setHover(0)}>
+              {stars.map((i) => {
+                const active = (hover || rating) >= i;
+                return <button key={i} type="button" className={`${styles.starBtn} ${active ? styles.starBtnActive : ""}`}
                   onMouseEnter={() => !hasRated && !submitting && setHover(i)}
-                  onMouseLeave={() => setHover(0)}
-                  onClick={() => handleRating(i)}
-                  disabled={hasRated || submitting}
-                  aria-label={`تقييم ${i} من 5`}
-                  aria-pressed={rating === i}
-                >
-                  {active ? (
-                    <FaStar className={styles.starActive} />
-                  ) : (
-                    <FaRegStar className={styles.star} />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Submitting indicator */}
-          {submitting && (
-            <div className={styles.submittingOverlay}>
-              <span className={styles.spinner}></span>
-              <span>جاري الإرسال...</span>
+                  onFocus={() => !hasRated && !submitting && setHover(i)} onBlur={() => setHover(0)}
+                  onClick={() => handleRating(i)} disabled={hasRated || submitting}
+                  aria-label={`تقييم ${i} من 5`} aria-pressed={rating === i}>
+                  {active ? <FaStar className={styles.starActive} aria-hidden /> : <FaRegStar className={styles.star} aria-hidden />}
+                  <span aria-hidden>{i}</span>
+                </button>;
+              })}
             </div>
-          )}
-
-          {/* Rating Meta */}
-          <div className={styles.ratingMeta}>
-            <span className={styles.avg}>
-              <FaStarHalfAlt size={16} />
-              متوسط التقييم {loading ? "..." : average.toFixed(1)} / 5
-            </span>
-            <span className={styles.sep} />
-            <span className={styles.count}>
-              عدد التقييمات: {loading ? "..." : count}
-            </span>
+            <div className={styles.feedbackStatus} role="status">
+              {submitting && <span className={styles.submittingOverlay}><span className={styles.spinner} aria-hidden /><span>جاري الإرسال...</span></span>}
+              {hasRated && <span className={styles.savedMessage}>شكراً لك! تم تسجيل تقييمك بنجاح</span>}
+            </div>
+            <div className={styles.ratingSummary}>
+              <div className={styles.averageValue} aria-hidden>{loading ? "…" : average.toFixed(1)}<small>/ 5</small></div>
+              <div className={styles.summaryDetails}>
+                <div className={styles.placeholderStars} aria-hidden="true">{loading ? <span className={styles.loadingText}>جاري التحميل...</span> : renderAverageStars()}</div>
+                <div className={styles.ratingMeta}>
+                  <span className={styles.avg}>متوسط التقييم {loading ? "..." : average.toFixed(1)} / 5</span>
+                  <span className={styles.count}>عدد التقييمات: {loading ? "..." : count}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

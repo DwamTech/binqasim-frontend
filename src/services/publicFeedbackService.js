@@ -2,7 +2,7 @@
 // PUBLIC FEEDBACK SERVICE - Platform Rating, Suggestions & Complaints
 // ════════════════════════════════════════════════════════════════════════════
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const API_BASE_URL = "/api/public";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // HELPER FUNCTIONS
@@ -94,16 +94,17 @@ export const PublicFeedbackService = {
         formData.append("name", data.name);
         formData.append("email", data.email);
         formData.append("message", data.message);
+        formData.append("category", data.category || "أخرى");
 
         if (data.phone_number) {
-            formData.append("phone_number", data.phone_number);
+            formData.append("phone", data.phone_number);
         }
 
         if (data.attachment) {
-            formData.append("attachment_path", data.attachment);
+            formData.append("attachment", data.attachment);
         }
 
-        const response = await fetch(`${API_BASE_URL}/feedback`, {
+        const response = await fetch(`${API_BASE_URL}/public/feedback-submissions`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
@@ -131,16 +132,17 @@ export const PublicFeedbackService = {
         formData.append("name", data.name);
         formData.append("email", data.email);
         formData.append("message", data.message);
+        formData.append("category", data.category || "أخرى");
 
         if (data.phone_number) {
-            formData.append("phone_number", data.phone_number);
+            formData.append("phone", data.phone_number);
         }
 
         if (data.attachment) {
-            formData.append("attachment_path", data.attachment);
+            formData.append("attachment", data.attachment);
         }
 
-        const response = await fetch(`${API_BASE_URL}/feedback`, {
+        const response = await fetch(`${API_BASE_URL}/public/feedback-submissions`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
